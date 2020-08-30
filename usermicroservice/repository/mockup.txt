@@ -1,0 +1,92 @@
+package repository
+
+import(
+    "fmt"
+	"github.com/myrachanto/allmicro/gormmicro/usermicroservice/httperors"
+	"github.com/myrachanto/allmicro/gormmicro/usermicroservice/model"
+)
+var (
+	MockRepository mockrepository = mockrepository{}
+	users     = []*model.User{}
+	currentId uint = 1
+)
+
+///curtesy to gorm
+type mockrepository struct{}
+func (repository mockrepository) Create(user *model.User) (*model.User, *httperors.HttpError) {
+	if err := user.Validate(); err != nil {
+		return nil, err
+	}
+	user.ID = currentId
+	currentId++
+	users[user.ID] = user
+	return user, nil
+}
+
+func (repository mockrepository) GetOne(id int) (*model.User, *httperors.HttpError) {
+	
+	if user := users[id]; user != nil {
+		return user, nil
+	}
+	return nil, httperors.NewNotFoundError(fmt.Sprintf("user with Id %d not found", id))
+}
+
+func (repository mockrepository) GetAll(users []model.User) ([]model.User, *httperors.HttpError) {
+	///////////////figure how to convert pointer
+	// customers = cust
+	return users, nil
+}
+
+func (repository mockrepository) Update(id int, user *model.User) (*model.User, *httperors.HttpError) {
+	
+	uuser := users[id]
+	if uuser == nil {
+		return nil, httperors.NewNotFoundError("No results found")
+	}
+	if user.FName  == "" {
+		user.FName = uuser.FName
+	}
+	if user.LName  == "" {
+		user.LName = uuser.LName
+	}
+	if user.UName  == "" {
+		user.UName = uuser.UName
+	}
+	if user.Phone  == "" {
+		user.Phone = uuser.Phone
+	}
+	if user.Address  == "" {
+		user.Address = uuser.Address
+	}
+	if user.Picture  == "" {
+		user.Picture = uuser.Picture
+	}
+	if user.Email  == "" {
+		user.Email = uuser.Email
+	}
+	if user.Password  == "" {
+		user.Password = uuser.Password
+	}
+
+	users[id].FName = user.FName
+	users[id].LName = user.LName
+	users[id].UName = user.UName
+	users[id].Address = user.Address
+	users[id].Picture = user.Picture
+	users[id].Password = user.Password
+	users[id].Email = user.Email
+	users[id].Phone = user.Phone
+	return user, nil
+}
+func (repository mockrepository) Delete(id int) (*httperors.HttpSuccess, *httperors.HttpError) {
+	
+	if user := users[id]; user == nil {
+		return nil, httperors.NewNotFoundError("No results found")
+	}
+	//figure out how to delete
+	// if user := users[id]; user != nil {
+	// 	return user, nil
+	// }
+	// delete(users, id)
+	return httperors.NewSuccessMessage("deleted successfully"), nil
+}
